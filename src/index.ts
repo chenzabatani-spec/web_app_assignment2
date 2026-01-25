@@ -1,11 +1,13 @@
-const express = require('express');
-const app = express();
-const dotenv = require('dotenv').config(); 
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const commentRouter = require('./routes/comment_routes');
+import express from 'express';
+import dotenv from 'dotenv';
+dotenv.config(); 
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
 
-const postRouter = require('./routes/post_routes');
+import postRouter from './routes/post_routes';
+import commentRouter from './routes/comment_routes';
+
+const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -13,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/posts', postRouter);
 app.use('/comments', commentRouter);
 
-mongoose.connect(process.env.DATABASE_URL);
+mongoose.connect(process.env.DATABASE_URL as string);
 
 const db = mongoose.connection;
 db.on('error', (error) => {
