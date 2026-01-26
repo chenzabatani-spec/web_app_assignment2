@@ -12,7 +12,7 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
 
     const token = authHeader.split(" ")[1];
 
-    const secret: string = process.env.TOKEN_SECRET || "secret";
+    const secret: string = process.env.TOKEN_SECRET as string;
 
     try {
         const decoded = jwt.verify(token, secret) as { _id: string };
