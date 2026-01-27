@@ -5,6 +5,7 @@ import bodyParser from 'body-parser';
 import postRouter from './routes/post_routes';
 import commentRouter from './routes/comment_routes';
 import authRouter from './routes/auth_routes';
+import userRouter from './routes/user_routes';
 
 dotenv.config(); 
 
@@ -15,6 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/auth', authRouter);
 app.use('/posts', postRouter);
 app.use('/comments', commentRouter);
+app.use('/users', userRouter);
 
 mongoose.connect(process.env.DATABASE_URL as string);
 
