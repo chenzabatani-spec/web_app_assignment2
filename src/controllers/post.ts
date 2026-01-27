@@ -1,47 +1,26 @@
-import Post from '../models/post_model';
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../middleware/auth_middleware';
+import PostModel, { IPost } from '../models/post_model';
+import { BaseController } from './base_controller';
 
-const createPost = async (req: Request, res: Response) => {
-    try {
-        const post = await Post.create(req.body);
-        res.status(201).json(post);
-    } catch (error) {
-        res.status(400).json({ message: (error as Error).message });
+
+class PostController extends BaseController<IPost> {
+    constructor() {
+        super(PostModel);
     }
-};
 
-const getAllPosts = async (req: Request, res: Response) => {
-    const filter = req.query.sender ? { sender: req.query.sender } : {};
+    async create(req: AuthRequest, res: Response) {
 
-    try {
-        const posts = await Post.find(filter);
-        res.status(200).json(posts);
-    } catch (error) {
-        res.status(400).json({ message: (error as Error).message });
+        //take userId from req.user set by authMiddleware
+        const userId = req.user?._id;
+
+        if (userId) {
+            //attach userId to the post being created
+            req.body.sender = userId;
+        }
+
+        return super.create(req, res);
     }
-};
+}
 
-const getPostById = async (req: Request, res: Response) => {
-    try {
-        const post = await Post.findById(req.params.id);
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(400).json({ message: (error as Error).message });
-    }
-};
-
-const updatePost = async (req: Request, res: Response) => {
-    try {
-        const post = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(400).json({ message: (error as Error).message });
-    }
-};
-
-export default {
-    createPost,
-    getAllPosts,
-    getPostById,
-    updatePost
-};
+export default new PostController();

@@ -12,12 +12,12 @@ const sendError = (res: Response, message: string, code?: number) => {
 const generateTokens = (userId: string): { accessToken: string, refreshToken: string } => {
     const accessToken = jwt.sign(
         { _id: userId },
-        process.env.TOKEN_SECRET || "secret",
+        process.env.TOKEN_SECRET as string,
         { expiresIn: process.env.TOKEN_EXPIRES || "1h" } as jwt.SignOptions
     );
     const refreshToken = jwt.sign(
         { _id: userId },
-        process.env.REFRESH_TOKEN_SECRET || "refreshSecret",
+        process.env.REFRESH_TOKEN_SECRET as string,
         { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" } as jwt.SignOptions // Expiration longer for refresh
     );
     return { accessToken, refreshToken };

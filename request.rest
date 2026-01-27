@@ -111,7 +111,7 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "email": "user1@test.com",
+    "email": "user_test@test.com",
     "password": "123456"
 }
 
@@ -120,22 +120,41 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "email": "user1@test.com",
+    "email": "user_test@test.com",
     "password": "123456"
 }
 
-### 3. Refresh Token
+### 3. Fail expected -User Create Post without token
+POST http://localhost:3000/posts
+Content-Type: application/json
+
+{
+    "title": "Hacker Post - Unauthorized Post",
+    "content": "This post should not be created."
+}
+
+### 4. Create Post with token
+POST http://localhost:3000/posts
+Content-Type: application/json
+Authorization: Bearer <REPLACE_WITH_VALID_ACCESS_TOKEN>
+
+{
+    "title": "My Authorized Post",
+    "content": "This post should be created successfully."
+}
+
+### 5. Refresh Token
 POST http://localhost:3000/auth/refresh
 Content-Type: application/json
 
 {
-    "refreshToken": "REPLACE_WITH_VALID_REFRESH_TOKEN"
+    "refreshToken": "Replace_with_valid_refresh_token"
 }
 
-### 4. User Logout
+### 6. User Logout
 POST http://localhost:3000/auth/logout
 Content-Type: application/json
 
 {
-    "refreshToken": "REPLACE_WITH_VALID_REFRESH_TOKEN"
+    "refreshToken": "Replace_with_valid_refresh_token"
 }
