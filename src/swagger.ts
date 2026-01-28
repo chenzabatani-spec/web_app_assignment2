@@ -15,6 +15,59 @@ const options: swaggerJSDoc.Options = {
                 url: "http://localhost:3000",
             },
         ],
+        components: {
+            securitySchemes: {
+                BearerAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                },
+            },
+            schemas: {
+                Post: {
+                    type: "object",
+                    required: ["title", "content", "sender"],
+                    properties: {
+                    _id: { type: "string", description: "The auto-generated id of the post" },
+                    title: { type: "string", description: "The post title" },
+                    content: { type: "string", description: "The post content" },
+                    sender: { type: "string", description: "The sender user ID" },
+                    },
+                    example: {
+                    _id: "609e129e1c4ae12f34567890",
+                    title: "Sample Post",
+                    content: "This is a sample post content.",
+                    sender: "609e129e1c4ae12f34567891",
+                    },
+                },
+                Comment: {
+                    type: "object",
+                    required: ["postId", "content", "sender"],
+                    properties: {
+                    _id: { type: "string", description: "The auto-generated id of the comment" },
+                    postId: { type: "string", description: "The ID of the post" },
+                    content: { type: "string", description: "The comment content" },
+                    sender: { type: "string", description: "The sender user ID" },
+                    },
+                    example: {
+                    _id: "709e129e1c4ae12f34567890",
+                    postId: "609e129e1c4ae12f34567890",
+                    content: "This is a sample comment content.",
+                    sender: "609e129e1c4ae12f34567891",
+                    },
+                },
+                //placeholder for User schema
+                User: {
+                    type: "object",
+                    required: ["username", "email"],
+                    properties: {
+                    _id: { type: "string", description: "The auto-generated id of the user" },
+                    username: { type: "string", description: "The user's username" },
+                    email: { type: "string", description: "The user's email" },
+                    }
+                }
+            },
+        },
     },
     apis: ["./src/routes/*.ts"],
 };
