@@ -105,7 +105,14 @@ router.post('/', authMiddleware, commentController.create.bind(commentController
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Comment'
+ *             type: object
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: The updated comment content
+ *                 required: true
+ *           example:
+ *             content: "Updated comment content."
  *     responses:
  *       200:
  *         description: The comment was updated
