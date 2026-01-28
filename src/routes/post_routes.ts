@@ -5,37 +5,28 @@ import authMiddleware from '../middleware/auth_middleware';
 const router = express.Router();
 
 /**
-* @swagger
-* tags:
-* name: Posts
-* description: The Posts managing API
-*/
-
-/**
  * @swagger
  * /posts:
  *   get:
- *    summary: Retrieve a list of posts
- *    tags: [Posts]
- *    security: []
- *    parameters:
- *      - in: query
- *        name: sender
- *        schema:
- *         type: string
- *        description: Filter posts by sender user ID
- *        example: 609e129e1c4ae12f34567891
- *    responses:
- *    200:
- *      description: Successfully retrieved a list of posts
- *      content:
- *        application/json:
- *          schema:
- *           type: array
- *           items:
- *            $ref: '#/components/schemas/Post'
- *   500:
- *     description: Server Error
+ *     summary: Retrieve a list of posts
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: query
+ *         name: sender
+ *         schema:
+ *           type: string
+ *         description: The sender ID to filter posts by. If left empty, returns all posts.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved a list of posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *              type: array
+ *              items:
+ *                $ref: '#/components/schemas/Post'
+ *       500:
+ *        description: Server Error
  */
 router.get('/', postController.getAll.bind(postController));
 
@@ -81,11 +72,20 @@ router.get('/:id', postController.getById.bind(postController));
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Post'
+ *             type: object
+ *             required:
+ *               - title
+ *               - content
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 description: The post title
+ *               content:
+ *                 type: string
+ *                 description: The post content
  *           example:
  *             title: "My first post"
  *             content: "Hello world from Swagger!"
- *             sender: "64f1a2b3c4d5e6f7890abc12"
  *     responses:
  *       201:
  *         description: Post created successfully
