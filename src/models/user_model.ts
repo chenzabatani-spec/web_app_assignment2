@@ -1,10 +1,10 @@
 import mongoose from 'mongoose';
 
-export interface IUser {
+export interface IUser extends mongoose.Document {
     username: string;
     email: string;
     password?: string;
-    refreshTokens: string[];
+    refreshTokens?: string[];
 }
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -24,7 +24,17 @@ const userSchema = new mongoose.Schema<IUser>({
     },
     refreshTokens: {
         type: [String],
-        default: []
+        default: [],
+    }
+});
+
+userSchema.set('toJSON', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    transform: (doc: any, ret: any) => {
+        delete ret.password;
+        delete ret.refreshTokens;
+        delete ret.__v;
+        return ret;
     }
 });
 
