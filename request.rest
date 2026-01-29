@@ -111,8 +111,8 @@ POST http://localhost:3000/auth/register
 Content-Type: application/json
 
 {
-    "username": "user_test",
-    "email": "user_test@test.com",
+    "username": "user_test3",
+    "email": "user_test3@test.com",
     "password": "123456"
 }
 
@@ -121,7 +121,7 @@ POST http://localhost:3000/auth/login
 Content-Type: application/json
 
 {
-    "email": "user_test@test.com",
+    "email": "user_test2@test.com",
     "password": "123456"
 }
 

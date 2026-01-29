@@ -6,12 +6,15 @@ import postRouter from './routes/post_routes';
 import commentRouter from './routes/comment_routes';
 import authRouter from './routes/auth_routes';
 import userRouter from './routes/user_routes';
+import { setupSwagger } from './swagger';
 
 dotenv.config(); 
 
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+setupSwagger(app);
 
 app.use('/auth', authRouter);
 app.use('/posts', postRouter);

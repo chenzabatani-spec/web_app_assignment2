@@ -2,7 +2,7 @@ import { Request, Response} from 'express';
 import  { Model } from 'mongoose';
 
 export class BaseController<T> {
-    model: Model<T>;
+    protected model: Model<T>;
 
     constructor(model: Model<T>) {
         this.model = model;
