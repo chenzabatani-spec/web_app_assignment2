@@ -56,7 +56,6 @@ const options = {
                     sender: "609e129e1c4ae12f34567891",
                     },
                 },
-                //placeholder for User schema
                 User: {
                     type: "object",
                     required: ["username", "email"],
@@ -64,7 +63,14 @@ const options = {
                     _id: { type: "string", description: "The auto-generated id of the user" },
                     username: { type: "string", description: "The user's username" },
                     email: { type: "string", description: "The user's email" },
-                    }
+                    password: { type: "string", description: "The user's password" },
+                    },
+                    example: {
+                    _id: "809e129e1c4ae12f34567890",
+                    username: "sampleuser",
+                    email: "kuku@example.com",
+                    password: "hashedpassword123",
+                    },
                 }
             },
         },

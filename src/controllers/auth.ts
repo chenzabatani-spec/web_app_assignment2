@@ -1,4 +1,3 @@
-
 import { Request, Response } from 'express';
 import { AuthRequest } from '../middleware/auth_middleware';
 import User from '../models/user_model';
@@ -117,7 +116,7 @@ const logout = async (req: Request, res: Response) => {
     try {
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET || "refreshSecret") as { _id: string };
         const user = await User.findById(decoded._id);
-        if (user) {
+        if (user && user.refreshTokens) {
             user.refreshTokens = user.refreshTokens.filter(t => t !== refreshToken);
             await user.save();
         }
