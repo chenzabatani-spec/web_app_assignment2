@@ -136,4 +136,19 @@ router.put('/:id', authMiddleware, userController.update.bind(userController));
  */
 router.delete('/:id', authMiddleware, userController.delete.bind(userController));
 
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new user
+ *     description: This route is disabled. Please use /auth/register to create a new user.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       405:
+ *         description: Method Not Allowed
+ */
+router.post("/", authMiddleware, userController.create.bind(userController));
+
 export default router;

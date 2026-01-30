@@ -147,6 +147,37 @@ router.post('/logout', authController.logout);
  *         description: Refresh token reused or invalid
  */
 router.post('/refresh', authController.refresh);
-router.post('/change-password', authMiddleware, authController.changePassword);
+
+/**
+ * @swagger
+ * /auth/password:
+ *   put:
+ *     summary: Change user password
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - oldPassword
+ *               - newPassword
+ *             properties:
+ *               oldPassword:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       401:
+ *         description: Incorrect old password
+ *       404:
+ *         description: User not found
+ */
+router.put("/password", authMiddleware, authController.changePassword);
 
 export default router;
