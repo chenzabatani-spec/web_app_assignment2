@@ -50,7 +50,7 @@ const register = async (req: Request, res: Response) => {
         user.refreshTokens.push(tokens.refreshToken);
         await user.save();
         
-        res.status(201).json({ ...tokens, _id: user._id, username: user.username });
+        res.status(201).json({ ...tokens, _id: user._id, username: user.username, email: user.email });
     } catch (err) {
         sendError(res, (err as Error).message || "Error registering user");
     }
