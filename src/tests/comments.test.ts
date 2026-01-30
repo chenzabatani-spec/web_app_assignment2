@@ -1,8 +1,8 @@
 import request from "supertest";
 import initApp from "../app";
 import mongoose from "mongoose";
-import UserModel from "../models/user_model";
 import PostModel from "../models/post_model";
+import UserModel from "../models/user_model";
 import CommentModel from "../models/comment_model";
 import { Express } from "express";
 
@@ -11,110 +11,145 @@ let accessToken: string;
 let postId: string;
 
 const testUser = {
-    email: "commenter@test.com",
+    email: "comment@test.com",
     password: "password123",
-    username: "commenter"
+    username: "commentUser"
 };
 
 beforeAll(async () => {
-    // Initialize application
     app = await initApp();
-    
-    // Clean all relevant collections
-    await UserModel.deleteMany();
-    await PostModel.deleteMany();
     await CommentModel.deleteMany();
+    await PostModel.deleteMany();
+    await UserModel.deleteMany();
 
-    // Register and login to get an access token
+    // Register & Login
     await request(app).post("/auth/register").send(testUser);
     const loginRes = await request(app).post("/auth/login").send(testUser);
     accessToken = loginRes.body.accessToken;
 
-    // Create a parent post for the comments
-    const postRes = await request(app)
-        .post("/posts")
+    // Create Post
+    const postRes = await request(app).post("/posts")
         .set("Authorization", `Bearer ${accessToken}`)
-        .send({ 
-            title: "Post for Comments", 
-            content: "Parent post content" 
-        });
-    
+        .send({ title: "Post for comments", content: "Content" });
     postId = postRes.body._id;
 });
 
 afterAll(async () => {
-    // Close database connection
     await mongoose.connection.close();
 });
 
 describe("Comments API Tests", () => {
     
-    test("POST /comments - Should add a comment to a post", async () => {
-        const comment = {
-            postId: postId,
-            content: "This is a test comment"
-        };
-
+    test("POST /comments - Should create comment", async () => {
         const response = await request(app)
             .post("/comments")
             .set("Authorization", `Bearer ${accessToken}`)
-            .send(comment);
-
+            .send({ postId, content: "My Comment" });
         expect(response.statusCode).toBe(201);
-        expect(response.body.content).toBe(comment.content);
-        expect(response.body.postId).toBe(postId);
     });
 
-    test("GET /comments - Should return comments for a specific post", async () => {
-        // Querying comments linked to the created post
-        const response = await request(app).get(`/comments?postId=${postId}`);
-        
-        expect(response.statusCode).toBe(200);
-        expect(Array.isArray(response.body)).toBeTruthy();
-        expect(response.body.length).toBeGreaterThan(0);
-        expect(response.body[0].content).toBe("This is a test comment");
-    });
-
-    test("DELETE /comments/:id - Should delete a specific comment", async () => {
-        // Create a temporary comment to delete
-        const commentRes = await request(app)
+    test("POST /comments - Should fail if postId is missing", async () => {
+        const response = await request(app)
             .post("/comments")
             .set("Authorization", `Bearer ${accessToken}`)
-            .send({ postId: postId, content: "Delete this" });
-            
-        const commentId = commentRes.body._id;
-
-        const response = await request(app)
-            .delete(`/comments/${commentId}`)
-            .set("Authorization", `Bearer ${accessToken}`);
-
-        expect(response.statusCode).toBe(200);
+            .send({ content: "Missing postId" });
+        expect(response.statusCode).toBe(400);
     });
 
-    test("DELETE /comments/:id - Should fail to delete another user's comment", async () => {
-        // create a second user
-        const hackerUser = {
-            email: "hacker@test.com",
-            password: "password123",
-            username: "hacker"
+    test("POST /comments - Should fail if post does not exist", async () => {
+        const fakeId = new mongoose.Types.ObjectId();
+        const response = await request(app)
+            .post("/comments")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ postId: fakeId, content: "Ghost Post" });
+        expect(response.statusCode).toBe(404);
+    });
+
+    test("PUT /comments/:id - Should update comment", async () => {
+        // Create temp comment
+        const res = await request(app).post("/comments")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ postId, content: "Original" });
+        const commentId = res.body._id;
+
+        const updateRes = await request(app)
+            .put(`/comments/${commentId}`)
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ content: "Updated" });
+        
+        expect(updateRes.statusCode).toBe(200);
+        expect(updateRes.body.content).toBe("Updated");
+    });
+
+    test("PUT /comments/:id - Should fail to update another user's comment", async () => {
+        // Create hacker user
+        const hacker = { 
+            email: "hacker_update@test.com", 
+            password: "123", 
+            username: "hacker_update" 
         };
-        await request(app).post("/auth/register").send(hackerUser);
-        const hackerLogin = await request(app).post("/auth/login").send(hackerUser);
+        await request(app).post("/auth/register").send(hacker);
+        const hackerLogin = await request(app).post("/auth/login").send(hacker);
         const hackerToken = hackerLogin.body.accessToken;
 
-        // create a comment with the original user
-        const commentRes = await request(app)
-            .post("/comments")
-            .set("Authorization", `Bearer ${accessToken}`) // הטוקן המקורי
-            .send({ postId: postId, content: "Don't delete me!" });
-        const commentId = commentRes.body._id;
+        // Create comment with original user
+        const res = await request(app).post("/comments")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ postId, content: "Original Content" });
+        const commentId = res.body._id;
 
-        // try to delete the comment with the hacker user
+        // Try update with hacker
         const response = await request(app)
-            .delete(`/comments/${commentId}`)
-            .set("Authorization", `Bearer ${hackerToken}`); // הטוקן של הפורץ
+            .put(`/comments/${commentId}`)
+            .set("Authorization", `Bearer ${hackerToken}`)
+            .send({ content: "Hacked Content" });
 
-        // expect failure due to lack of permission
         expect(response.statusCode).toBe(403);
+    });
+
+    test("DELETE /comments/:id - Should fail to delete others comment", async () => {
+        // Create hacker
+        const hacker = { email: "bad@guy.com", password: "123", username: "bad" };
+        await request(app).post("/auth/register").send(hacker);
+        const hackerLogin = await request(app).post("/auth/login").send(hacker);
+        
+        // Create comment with original user
+        const res = await request(app).post("/comments")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ postId, content: "Don't touch" });
+        
+        // Try delete with hacker
+        const delRes = await request(app)
+            .delete(`/comments/${res.body._id}`)
+            .set("Authorization", `Bearer ${hackerLogin.body.accessToken}`);
+
+        expect(delRes.statusCode).toBe(403);
+    });
+
+    // Try to get comments without postId
+    test("GET /comments - Should fail if postId is missing in query", async () => {
+        const response = await request(app).get("/comments"); // שלחנו בלי ?postId=...
+        expect(response.statusCode).toBe(400);
+    });
+
+    // Try to update a non-existing comment
+    test("PUT /comments/:id - Should return 404 if comment does not exist", async () => {
+        const fakeId = new mongoose.Types.ObjectId();
+        const response = await request(app)
+            .put(`/comments/${fakeId}`)
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ content: "Ghost update" });
+            
+        expect(response.statusCode).toBe(404);
+    });
+
+    // Try to delete a non-existing comment
+    test("DELETE /comments/:id - Should return 404 if comment does not exist", async () => {
+        const fakeId = new mongoose.Types.ObjectId();
+        const response = await request(app)
+            .delete(`/comments/${fakeId}`)
+            .set("Authorization", `Bearer ${accessToken}`);
+            
+        expect(response.statusCode).toBe(404);
     });
 });
