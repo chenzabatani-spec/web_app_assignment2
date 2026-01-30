@@ -36,6 +36,7 @@ describe("Posts API Tests", () => {
     
     test("GET /posts - Should return empty list initially", async () => {
         const response = await request(app).get("/posts");
+        
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual([]);
     });
@@ -58,6 +59,7 @@ describe("Posts API Tests", () => {
 
     test("GET /posts/:id - Should get a post by ID", async () => {
         const response = await request(app).get(`/posts/${postId}`);
+
         expect(response.statusCode).toBe(200);
         expect(response.body.title).toBe("Test Post");
     });
@@ -65,6 +67,7 @@ describe("Posts API Tests", () => {
     test("GET /posts/:id - Should return 404 for non-existent post", async () => {
         const fakeId = new mongoose.Types.ObjectId();
         const response = await request(app).get(`/posts/${fakeId}`);
+
         expect(response.statusCode).toBe(404);
     });
 
@@ -130,4 +133,27 @@ describe("Posts API Tests", () => {
         // Expecting an error (usually 500 in our current Base implementation)
         expect(response.statusCode).not.toBe(200); 
     });
+
+    test("POST /posts - Should fail validation with empty body", async () => {
+        const response = await request(app)
+            .post("/posts")
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({}); // Empty body causes validation error
+
+        expect(response.statusCode).toBe(400); 
+    });
+
+    test("PUT /posts/:id - Should return 400 for invalid ID format", async () => {
+        // Trying to update with an invalid ID format
+        // Will cause CastError in Mongoose, caught in BaseController
+        const response = await request(app)
+            .put("/posts/invalid_id_format_123") 
+            .set("Authorization", `Bearer ${accessToken}`)
+            .send({ 
+                title: "Updated Title"
+            }); 
+            
+        expect(response.statusCode).toBe(400);
+    });
+    
 });
